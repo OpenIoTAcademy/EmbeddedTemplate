@@ -1,0 +1,66 @@
+
+# This is a basic workflow to help you get started with Actions
+name: Coverity Scan 
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  #schedule:
+  # - cron: '0 18 * * *' # Daily at 18:00 UTC
+  push:
+    branches: [ T-8 ]
+  pull_request:
+    branches: [ T-8 ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        echo Installing Dependencies
+            echo Compiling..
+            set -x
+            sudo sed /etc/apt/sources.list -e "s/^# deb-src/deb-src/g" -i
+            sudo apt-get update -y
+            sudo apt-get install -y wget tar
+            sudo apt-get install -y build-essential
+    ###        
+    - name: Download Coverity Build Tool
+      run: |
+        wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=EmbeddedTemplate" -O cov-analysis-linux64.tar.gz
+        mkdir cov-analysis-linux64
+        tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+      env:
+        TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+    ###
+    - name: Fixed world writable dirs
+      run: |
+        chmod go-w $HOME
+        sudo chmod -R go-w /usr/share
+    # Generating a output for send to Covertiy Scan
+    - name: Build with cov-build
+      run: |
+        export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+        cov-build --dir cov-int make
+    # Sending the output 
+    - name: Submit the result to Coverity Scan
+      run: |
+        tar czvf EmbeddedTemplate.tgz cov-int
+        curl \
+          --form project=EmbeddedTemplate \
+          --form token=$TOKEN \
+          --form email=afari@gtu.edu.tr \
+          --form file=@EmbeddedTemplate.tgz \
+          --form version=trunk \
+          --form description="`./EmbeddedTemplate -v`" \
+          https://scan.coverity.com/builds?project=EmbeddedTemplate
+      env:
+        TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
