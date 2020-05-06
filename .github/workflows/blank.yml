@@ -23,4 +23,6 @@ jobs:
     - name: Run makefile
       run: |
         echo Compiling..
-        make
+        sudo apt-get update
+        sudo apt-get install splint
+        make check_all

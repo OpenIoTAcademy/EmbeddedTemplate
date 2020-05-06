@@ -5,6 +5,18 @@
 OUTPUT_PATH=out
 OUTPUT_NAME=test
 
+# Path that includes all makefiles
+MAKE_FILES_PATH = Environment/BuildSystem
+
+#
+# Detailed Compiling output
+#
+ifndef V
+SILENCE = -s
+else
+SILENCE =
+endif
+
 # The cross compile if exists, otherwise uses the gcc
 CROSS_COMPILE?=
 
@@ -12,7 +24,7 @@ CROSS_COMPILE?=
 # Source (.c) Files
 #
 SOURCE_FILES= \
-	Source/test.c
+	Source/Test/test.c
 
 #
 # Header (.h) File Directories
@@ -40,7 +52,7 @@ CFLAGS=${INCLUDE_DIRECTORIES} ${DEFINES}
 # Rules
 #############################################
 
-.PHONY: all rebuild test clean out run
+.PHONY: all rebuild test clean out run unittest check_all
 
 # Rebuild
 rebuild: clean all
@@ -56,7 +68,7 @@ test: out
 
 # The clean rule
 clean:
-	rm -f test
+	rm -rf ${OUTPUT_PATH}
 
 # The rule to create out path
 out:
@@ -66,3 +78,11 @@ out:
 run:
 	./${OUTPUT_PATH}/${OUTPUT_NAME}
 
+unittest:
+	make -f $(MAKE_FILES_PATH)/execute_unittest.mk TEST_MODULE=$(TEST_MODULE) $(SILENCE)
+
+#
+# Builds and Runs all system validation objects.
+#
+check_all: clean all
+	make -f $(MAKE_FILES_PATH)/execute_systemcheck.mk $(SILENCE)
