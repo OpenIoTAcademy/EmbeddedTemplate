@@ -17,6 +17,8 @@
 	 printf("\r\nTest Config Value : %d\r\n", TEST_CONFIG);
  }
  
+ error here
+ 
  int main(void)
  {
 	 testFunction();
