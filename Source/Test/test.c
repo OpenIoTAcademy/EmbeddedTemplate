@@ -13,9 +13,9 @@
   
 int testSum(int x, int y)
 {
-    return x + y;
+    return x + x;
 }
- 
+
 #ifndef UNIT_TEST
 int main(void)
 {
