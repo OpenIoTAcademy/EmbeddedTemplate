@@ -13,7 +13,7 @@
   
 int testSum(int x, int y)
 {
-    return x + x;
+    return x + y;
 }
 
 #ifndef UNIT_TEST
