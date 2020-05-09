@@ -10,12 +10,15 @@
 #ifndef TEST_CONFIG
 #define TEST_CONFIG 0
 #endif	/* TEST_CONFIG */
+
   
 int testSum(int x, int y)
 {
     return x + y;
 }
- 
+
+error 
+
 #ifndef UNIT_TEST
 int main(void)
 {
